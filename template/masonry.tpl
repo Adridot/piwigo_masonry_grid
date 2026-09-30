@@ -19,14 +19,20 @@
             {foreach from=$thumbnails item=thumbnail}
                 {assign var=derivative value=$pwg->derivative($derivative_params, $thumbnail.src_image)}
                 {assign var=dsz value=$derivative->get_size()}
-                {assign var=d2 value=$pwg->derivative($derivative_params_2x, $thumbnail.src_image)}
-                {assign var=d2sz value=$d2->get_size()}
-                {assign var=d3 value=$pwg->derivative($derivative_params_3x, $thumbnail.src_image)}
-                {assign var=d3sz value=$d3->get_size()}
+                {* srcset skips variants no wider than the previous one (small originals are never upscaled) *}
+                {assign var=srcset value="`$derivative->get_url()` `$dsz[0]`w"}
+                {assign var=srcset_w value=$dsz[0]}
+                {foreach from=$srcset_params item=sp}
+                    {assign var=dv value=$pwg->derivative($sp, $thumbnail.src_image)}
+                    {assign var=dvsz value=$dv->get_size()}
+                    {if $dvsz[0] > $srcset_w}
+                        {assign var=srcset value="`$srcset`, `$dv->get_url()` `$dvsz[0]`w"}
+                        {assign var=srcset_w value=$dvsz[0]}
+                    {/if}
+                {/foreach}
                 <div class="masonry-thumb" data-ar="{if $dsz[0] > 0}{$dsz[1]/$dsz[0]}{else}1{/if}">
                     <a href="{$thumbnail.URL}" data-index="{$mq_idx}">
-                        {* srcset skips variants no larger than the previous one (small originals are never upscaled) *}
-                        <img draggable="false" src="{$derivative->get_url()}" srcset="{$derivative->get_url()} {$dsz[0]}w{if $d2sz[0] > $dsz[0]}, {$d2->get_url()} {$d2sz[0]}w{/if}{if $d3sz[0] > $d2sz[0]}, {$d3->get_url()} {$d3sz[0]}w{/if}" sizes="{$MASONRY_WIDTH|escape:'html'}px" width="{$dsz[0]}" height="{$dsz[1]}" alt="{$thumbnail.TN_ALT}" title="{$thumbnail.TN_TITLE}">
+                        <img draggable="false" src="{$derivative->get_url()}" srcset="{$srcset}" sizes="{$MASONRY_WIDTH|escape:'html'}px" width="{$dsz[0]}" height="{$dsz[1]}" alt="{$thumbnail.TN_ALT}" title="{$thumbnail.TN_TITLE}">
                     </a>
                 </div>
             {assign var=mq_idx value=$mq_idx+1}
