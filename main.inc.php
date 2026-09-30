@@ -96,6 +96,9 @@ function masonry_assign_params($tpl_vars, $pictures)
   // reading order: 'row' = left-to-right then top-to-bottom, 'column' = top-to-bottom then left-to-right
   $order = (isset($params['order']) && $params['order'] === 'column') ? 'column' : 'row';
   $template->assign('derivative_params', ImageStdParams::get_custom($width, 9999));
+  // Larger variants for srcset: HiDPI screens, and flex columns stretched wider than $width
+  $template->assign('derivative_params_2x', ImageStdParams::get_custom(2 * $width, 9999));
+  $template->assign('derivative_params_3x', ImageStdParams::get_custom(3 * $width, 9999));
   $template->assign('MASONRY_WIDTH', $width);
   $template->assign('MASONRY_GAP', $gap);
   $template->assign('MASONRY_RADIUS', $radius);
